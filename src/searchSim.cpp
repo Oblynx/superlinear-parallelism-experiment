@@ -74,27 +74,34 @@ private:
 
     // Increase current world position
     address_= Address<dimensions-1>::val(localPos);
-    if (!(world_[address_] & 0x40000000)) world_[address_]<<= 1;  //Select bit#30
+    if (!(world_[address_] & 0x40000000)){
+      if(world_[address_] == 0) world_[address_]++;
+      else world_[address_]<<= 1;  //Select bit#30
+    }
     
-    /*DEBUG*/cout << "[world]: @"<<address_<<"="<<world_[address_]<<'\t';
+    /*DEBUG*//*cout << "[world]: @"<<address_<<"="<<world_[address_]<<'\t';
     cout << "[pos]: ";
     for(int i=0; i<dimensions; i++) cout<<position_[i]<<',';
-    cout <<'\n';
-
+    cout <<'\n';*/
+    
     // Calc addresses of nearby positions
     for(unsigned i=0; i<dimensions; i++){
       if (localPos[i] < WORLD_SHIFT){
+        //cout << "\tp < WS \t\t"<<i<<'\n';
         localPos[i]++;
         nearbyAddress_[i]= Address<dimensions-1>::val(localPos);
-        if (localPos[i] > -WORLD_SHIFT){
+        if (localPos[i] > -WORLD_SHIFT+1){
+          //cout << "\t-WS <p< WS \t"<<i<<" localPos: "<<localPos[i]<<"\n";
           localPos[i]-=2;
           nearbyAddress_[i+dimensions]= Address<dimensions-1>::val(localPos);
           localPos[i]++;
         } else {
+          //cout << "\tp == -WS \t"<<i<<"\n";
           localPos[i]--;
           nearbyAddress_[i+dimensions]= -1;
         }
       } else {
+        //cout << "\tp == WS \t"<<i<<"\n";
         nearbyAddress_[i]= -1;
         localPos[i]--;
         nearbyAddress_[i+dimensions]= Address<dimensions-1>::val(localPos);
@@ -107,30 +114,29 @@ private:
     short localWeights[2*dimensions], maxWeight=0, minWeight=30; 
     short maxLessRand=0, maxLessRandI[2*dimensions], j=0;
     for(short i=0; i<2*dimensions; i++){
-      localWeights[i]= 30-log2_32(world_[nearbyAddress_[i]]);
-      maxWeight= (localWeights[i] > maxWeight)? localWeights[i]: maxWeight;
-      minWeight= (localWeights[i] < minWeight)? localWeights[i]: minWeight;
+      if (nearbyAddress_[i] != -1){
+        localWeights[i]= 30-log2_32(world_[nearbyAddress_[i]]);
+        maxWeight= (localWeights[i] > maxWeight)? localWeights[i]: maxWeight;
+        minWeight= (localWeights[i] < minWeight)? localWeights[i]: minWeight;
+      } else localWeights[i]= -1;
     }
     //normalize weights so that maximum becomes 30
     if (maxWeight < 30){
       short normalizer= 30-maxWeight;
-      for(unsigned i=0; i<2*dimensions; i++) localWeights[i]+= normalizer;
+      for(unsigned i=0; i<2*dimensions; i++) if(localWeights[i] != -1) localWeights[i]+= normalizer;
       minWeight+= normalizer;
     }
     j=0;
     if (minWeight <= randS) {
-      for(short i=0; i<2*dimensions; i++) {
-        if (localWeights[i] == maxLessRand) maxLessRandI[j]= i, j++;
-        else if ((localWeights[i] > maxLessRand) && (localWeights[i] <= randS))
+      for(short i=0; i<2*dimensions; i++)
+        if (localWeights[i] == maxLessRand && localWeights[i] != -1) maxLessRandI[j]= i, j++;
+        else if (localWeights[i] > maxLessRand && localWeights[i] <= randS && localWeights[i] != -1)
                maxLessRand= localWeights[i], j=0, maxLessRandI[j]= i, j++;
-        //cout<<"\t[s::for]: Checked move: "<<i<<", "<<localWeights[i]<<", "<<randS <<"\n";
-      }
     } else {    // In that case, simply pick everything equal to minWeight
       for(short i=0; i<2*dimensions; i++){
-        if (localWeights[i] == minWeight) maxLessRandI[j]= i, j++;
+        if (localWeights[i] == minWeight && localWeights[i] != -1) maxLessRandI[j]= i, j++;
       }
     }
-    cout << "[search]: After picking: "<<randS<<", "<<j<<"\n";
     j= randS%j;
     
     //Picked nearbyAddress_[maxLessRandI[j]]
@@ -139,11 +145,10 @@ private:
     if (j < dimensions) position_[j]++;
     else position_[j-dimensions]--;
 
-    cout << "[new pos]: ";
+    /*cout << "[new pos]: ";
     for(int i=0; i<dimensions; i++) cout<<position_[i]<<',';
-    cout << "\tj="<<j<<'\n';
+    cout << "\tj="<<j<<'\n';*/
 
-    cout<<"[search]: exiT\n";
   }
   inline void randomWalk(){
     const unsigned i= rand()%(2*dimensions);
@@ -156,31 +161,34 @@ private:
 
 template<unsigned num_particles= 1, unsigned dimensions= 2, unsigned target_distance= 2>
 class Simulation {
-  public:
-    Simulation(ostream& s): outs_(s){
-      static_assert(dimensions<=15, "ERROR: Too many dimensions");
-      static_assert(dimensions>0, "Dimensions <= 0");
-      static_assert(target_distance<=WORLD_SHIFT, "target out-of-bounds");
-      static_assert(num_particles > 0, "nmu_particles <= 0");
-      for(unsigned i=0; i<num_particles; i++) particles_[i].setWorld(world_);
-      for(unsigned i=0; i<Power<WORLD_BOUNDS,dimensions>::val; i++) world_[i]=0;
-      for(unsigned i=0; i<dimensions; i++) targetPos_[i]= 0;
-      targetPos_[0]= target_distance;
+public:
+  Simulation(ostream& s): outs_(s){
+    static_assert(dimensions<=15, "ERROR: Too many dimensions");
+    static_assert(dimensions>0, "Dimensions <= 0");
+    static_assert(target_distance<=WORLD_SHIFT, "target out-of-bounds");
+    static_assert(num_particles > 0, "nmu_particles <= 0");
+    for(unsigned i=0; i<num_particles; i++) particles_[i].setWorld(world_);
+    for(unsigned i=0; i<dimensions; i++) targetPos_[i]= 0;
+    targetPos_[0]= target_distance;
+  }
+  void run_for(int experimentRuns){
+    unsigned time;
+    //outs_<<"Experiments number: "<<experimentRuns<<'\n';
+    for(int i=0; i<experimentRuns; i++){
+      resetWorld();
+      time= simulate();
+      outs_<<time<<'\n'; 
     }
-    void run_for(int experimentRuns){
-      unsigned time;
-      //outs_<<"Experiments number: "<<experimentRuns<<'\n';
-      for(int i=0; i<experimentRuns; i++){
-        time= simulate();
-        outs_<<time<<'\n'; 
-      }
-    }
-  private:
-    unsigned simulate();
-    Particle<dimensions> particles_[num_particles];
-    int targetPos_[dimensions];
-    unsigned world_[Power<WORLD_BOUNDS,dimensions>::val];
-    ostream& outs_;
+  }
+private:
+  void resetWorld(){
+    for(unsigned i=0; i<Power<WORLD_BOUNDS,dimensions>::val; i++) world_[i]=0;
+  }
+  unsigned simulate();
+  Particle<dimensions> particles_[num_particles];
+  int targetPos_[dimensions];
+  unsigned world_[Power<WORLD_BOUNDS,dimensions>::val];
+  ostream& outs_;
 };
 
 template<unsigned num_particles, unsigned dimensions, unsigned target_distance>
