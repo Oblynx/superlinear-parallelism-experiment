@@ -2,7 +2,25 @@ cmake_minimum_required(VERSION 2.8.12)
 set(CMAKE_CXX_COMPILER g++)
 project(superlinParallel)
 
-add_compile_options(-O1 -march=native)
+add_compile_options(-std=c++14 -O1 -march=native)
 
-add_executable(randomWalks src/randomWalks.cpp)
+IF(NOT DEFINED NUM_PARTICLES)
+  set(NUM_PARTICLES 1)
+ENDIF()
+IF(NOT DEFINED DIMENSIONS)
+  set(DIMENSIONS 2)
+ENDIF()
+IF(NOT DEFINED TARGET_DISTANCE)
+  set(TARGET_DISTANCE 3)
+ENDIF()
+IF(NOT DEFINED WORLD_BOUNDS)
+  set(WORLD_BOUNDS 21)
+ENDIF()
 
+add_executable(searchSim src/searchSim.cpp)
+target_compile_definitions(searchSim
+  PRIVATE NUM_PARTICLES=${NUM_PARTICLES}
+  PRIVATE DIMENSIONS=${DIMENSIONS}
+  PRIVATE TARGET_DISTANCE=${TARGET_DISTANCE}
+  PRIVATE WORLD_BOUNDS=${WORLD_BOUNDS}
+)
