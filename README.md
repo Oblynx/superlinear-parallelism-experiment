@@ -32,10 +32,10 @@ The moves are random, but not uniformly so. In order to implement a reasonably i
 ## Results
 The first [results](logs/results3_nexp2e5) support this proposition: doubling the number of particles cuts the time to about 1/4 the original. Here are some examples for a 2-dimensional world, with the target 10 tiles away from the particle starting point and with a boundary 14 tiles away from the start:
 
-![1 particle: Mean time 2150](logs/results3_nexp2e5/N1D2T10W29_mean2.1498e3_std910.18.eps "1 particle: Mean time 2150")
-![2 particles: Mean time 753](logs/results3_nexp2e5/N2D2T10W29_mean752.71_std555.89.eps "2 particles: Mean time 753")
-![3 particles: Mean time 367](logs/results3_nexp2e5/N3D2T10W29_mean367.48_std346.75.eps "3 particles: Mean time 367")
-![4 particles: Mean time 219](logs/results3_nexp2e5/N4D2T10W29_mean219.32_std226.86.eps "4 particles: Mean time 219")
-![7 particles: Mean time  92](logs/results3_nexp2e5/N7D2T10W29_mean92.359_std85.665.eps "7 particles: Mean time  92")
-![10 particles: Mean time 61](logs/results3_nexp2e5/N10D2T10W29_mean61.286_std44.909.eps "10 particles: Mean time 61")
-![20 particles: Mean time 35](logs/results3_nexp2e5/N20D2T10W29_mean34.956_std14.955.eps "20 particles: Mean time 35")
+![1 particle: Mean time 2150](logs/results3_nexp2e5/jpg/N1D2T10W29_mean2.1498e3_std910.18.jpg "1 particle: Mean time 2150")
+![2 particles: Mean time 753](logs/results3_nexp2e5/jpg/N2D2T10W29_mean752.71_std555.89.jpg "2 particles: Mean time 753")
+![3 particles: Mean time 367](logs/results3_nexp2e5/jpg/N3D2T10W29_mean367.48_std346.75.jpg "3 particles: Mean time 367")
+![4 particles: Mean time 219](logs/results3_nexp2e5/jpg/N4D2T10W29_mean219.32_std226.86.jpg "4 particles: Mean time 219")
+![7 particles: Mean time  92](logs/results3_nexp2e5/jpg/N7D2T10W29_mean92.359_std85.665.jpg "7 particles: Mean time  92")
+![10 particles: Mean time 61](logs/results3_nexp2e5/jpg/N10D2T10W29_mean61.286_std44.909.jpg "10 particles: Mean time 61")
+![20 particles: Mean time 35](logs/results3_nexp2e5/jpg/N20D2T10W29_mean34.956_std14.955.jpg "20 particles: Mean time 35")
