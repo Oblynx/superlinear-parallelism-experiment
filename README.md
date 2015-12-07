@@ -1,5 +1,5 @@
 # Superlinear Parallelism Experiment
-Simulation of particles that are searching for a target, demonstrating that many particles together do less work in total than fewer particles would do
+Simulation of particles that are searching for a target, demonstrating that many particles together do less work in total than fewer particles would do.
 
 ### Purpose
 Test the proposition that a search task is accomplished with less total effort by many agents together.
