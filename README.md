@@ -1,16 +1,17 @@
-# superlinear-parallelism-experiment
-Simulation of particles searching for a target, where many particles together do less work in total
+# Superlinear Parallelism Experiment
+Simulation of particles that are searching for a target, demonstrating that many particles together do less work in total than fewer particles would do
 
 ### Purpose
-Test the proposition that a searching task is accomplished with less total effort by many agents together.
+Test the proposition that a search task is accomplished with less total effort by many agents together.
 
 ### Method
-Simulate particles exploring an N-dimensional square world with bounds, in order to find a hidden target.
+Simulate particles exploring an N-dimensional square world with bounds, in order to find a hidden target. The simulation itself runs completely serially, but conceptualizes the concurrent search.
+If multiple agents had to do the same amount of total work as a single agent would, the time to complete the task would be expected to be divided by the number of agents, plus any communication overhead. But in fact, the more agents that work concurrently, the less total work that needs to be done.
 
 ## The Simulation in details
-
 ### The world
-The world is represented by an N-dimensional discrete space with limits +-B in every dimension, thus forming a tiled hypercube. The boundaries are reflective. The simulation progresses in discrete time steps, during which each particle one-after-the-other moves exactly once and can leave a mark on the tile that it occupies. Thus, each tile holds a value that represents how many times a particle has been there (any particle).
+The world is represented by an N-dimensional discrete space with limits +-B in every dimension, thus forming a tiled hypercube. The boundaries are reflective and all the particles begin at the center of the world.
+The simulation progresses in discrete time steps, during which each particle in sequence moves exactly once and leaves a mark on the tile it occupies. Thus, each tile holds a value that represents how many times a particle has been there (any particle).
 
 ### The particles
 They are defined by their position vector in the world. Each particle implements a move strategy that selects one of the adjacent positions in the hypercube to move into each timestep.
@@ -28,3 +29,13 @@ The moves are random, but not uniformly so. In order to implement a reasonably i
 6. If multiple moves remain, pick 1 almost-uniformly
 7. Move to selected tile
 
+## Results
+The first [results](logs/results3_nexp2e5) support this proposition: doubling the number of particles cuts the time to about 1/4 the original. Here are some examples for a 2-dimensional world, with the target 10 tiles away from the particle starting point and with a boundary 14 tiles away from the start:
+
+![1 particle: Mean time 2150](logs/results3_nexp2e5/N1D2T10W29_mean2.1498e3_std910.18.eps "1 particle: Mean time 2150")
+![2 particles: Mean time 753](logs/results3_nexp2e5/N2D2T10W29_mean752.71_std555.89.eps "2 particles: Mean time 753")
+![3 particles: Mean time 367](logs/results3_nexp2e5/N3D2T10W29_mean367.48_std346.75.eps "3 particles: Mean time 367")
+![4 particles: Mean time 219](logs/results3_nexp2e5/N4D2T10W29_mean219.32_std226.86.eps "4 particles: Mean time 219")
+![7 particles: Mean time  92](logs/results3_nexp2e5/N7D2T10W29_mean92.359_std85.665.eps "7 particles: Mean time  92")
+![10 particles: Mean time 61](logs/results3_nexp2e5/N10D2T10W29_mean61.286_std44.909.eps "10 particles: Mean time 61")
+![20 particles: Mean time 35](logs/results3_nexp2e5/N20D2T10W29_mean34.956_std14.955.eps "20 particles: Mean time 35")
